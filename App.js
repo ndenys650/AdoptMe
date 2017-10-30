@@ -1,6 +1,5 @@
 'use strict';
 
-// imports
 import React, { Component } from 'react';
 import {
   ActivityIndicator,
@@ -12,13 +11,13 @@ import {
 } from 'react-native';
 import _ from 'lodash';
 import PetCell from './PetCell';
+import PetScreen from './PetScreen';
 
-// immutable API key
+import dismissKeyboard from 'dismissKeyboard';
+
 const API_KEY = 'cb55e117215c6eb73506d7164b0a3b6d';
 
-// convert API info with lodash
 const convert = (obj) => {
-  console.log(obj);
   let result = {};
   _.map(obj, (item, key) => {
     let value;
@@ -29,14 +28,10 @@ const convert = (obj) => {
     else { value = item; }
     result[key] = value;
   });
-  console.log(result);
   return result;
 };
 
-
-// define empty array to store data from API
 let resultsCache = [];
-
 
 export default class App extends Component {
 
@@ -55,7 +50,6 @@ export default class App extends Component {
 
   fetchPets = () => {
 
-    // API url
     const offset = this.state.lastOffset,
       URL = `https://api.petfinder.com/pet.find?location=US&format=json&offset=${offset}&key=${API_KEY}`;
 
@@ -63,7 +57,6 @@ export default class App extends Component {
       this.setState({isLoading: true});
     }
 
-    // URL fetching and cleaning
     fetch(URL)
       .then((response) => response.json())
       .catch((error) => {
@@ -88,6 +81,23 @@ export default class App extends Component {
     return this.state.dataSource.cloneWithRows(pets);
   }
 
+  selectPet = (pet: Object) => {
+    if (Platform.OS === 'ios') {
+      this.props.navigator.push({
+        title: pet.name,
+        component: PetScreen,
+        passProps: {pet},
+      });
+    } else {
+      dismissKeyboard();
+      this.props.navigator.push({
+        title: pet.name,
+        name: 'pet',
+        pet: pet,
+      });
+    }
+  }
+
   onEndReached = () => {
     // We're already fetching
     if (this.state.isLoadingTail) {
@@ -108,6 +118,7 @@ export default class App extends Component {
     return (
       <PetCell
         key={pet.id}
+        onSelect={() => this.selectPet(pet)}
         onHighlight={() => highlightRowFunc(sectionID, rowID)}
         onUnhighlight={() => highlightRowFunc(null, null)}
         pet={pet}
