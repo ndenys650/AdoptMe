@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
   container: {
     marginTop: Platform.OS === 'ios' ? 64 : 0,
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: 'grey',
   },
   loading: {
     flex: 1,
